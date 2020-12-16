@@ -337,6 +337,9 @@ class TypeAnalyser(SyntheticTypeVisitor[Type], TypeAnalyzerPluginInterface):
             return self.anal_type(t.args[0])
         elif fullname in ('mypy_extensions.NoReturn', 'typing.NoReturn'):
             return UninhabitedType(is_noreturn=True)
+        elif fullname == 'mypy.isinstance.IsInstance':
+            # @TODO: restrict return types to boolean
+            return AnyType(TypeOfAny.from_error)
         elif fullname in ('typing_extensions.Literal', 'typing.Literal'):
             return self.analyze_literal_type(t)
         elif fullname in ('typing_extensions.Annotated', 'typing.Annotated'):

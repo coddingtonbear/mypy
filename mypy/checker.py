@@ -3967,11 +3967,18 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
         Guaranteed to not return None, None. (But may return {}, {})
         """
         if_map, else_map = self.find_isinstance_check_helper(node)
+        print(node)
+        print(node.args)
+        print(if_map)
+        print(else_map)
         new_if_map = self.propagate_up_typemap_info(self.type_map, if_map)
         new_else_map = self.propagate_up_typemap_info(self.type_map, else_map)
         return new_if_map, new_else_map
 
     def find_isinstance_check_helper(self, node: Expression) -> Tuple[TypeMap, TypeMap]:
+        import pdb
+        pdb.set_trace()
+        print(repr(node))
         type_map = self.type_map
         if is_true_literal(node):
             return {}, None
