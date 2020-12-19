@@ -2,8 +2,6 @@ from typing import Any, Union
 
 from mypy.isinstance import IsInstance
 
-print(IsInstance[int])
-
 
 def my_type_guard(my_var: Any) -> IsInstance[int]:
     try:
@@ -27,6 +25,7 @@ def my_function_with_std() -> bool:
 #    reveal_type(variable)
 #
 
-value = my_function_with_std()
+value: Any = "OK"
 
-reveal_type(value)
+if my_type_guard(value):
+    reveal_type(value)

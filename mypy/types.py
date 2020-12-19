@@ -1917,6 +1917,46 @@ class TypeType(ProperType):
         return TypeType.make_normalized(deserialize_type(data['item']))
 
 
+class TypeGuardFunction(ProperType):
+    item = None  # type: ProperType
+
+    def __init__(self,
+                 item: Bogus[Union[Instance, AnyType, TypeVarType, TupleType, NoneType, CallableType]],
+                 line: int = -1,
+                 column: int = -1) -> None:
+        super().__init__(line, column)
+        self.item = item
+
+    def accept(self, visitor: 'TypeVisitor[T]') -> T:
+        return visitor.visit_any(self)
+
+    def __hash__(self) -> int:
+        return hash((TypeGuardFunction, self.item))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, TypeGuardFunction):
+            return NotImplemented
+        return self.item == other.item
+
+    @staticmethod
+    def make_normalized(item: Type, *, line: int = -1, column: int = -1) -> ProperType:
+        item = get_proper_type(item)
+        if isinstance(item, UnionType):
+            return UnionType.make_union(
+                [TypeType.make_normalized(union_item) for union_item in item.items],
+                line=line, column=column
+            )
+        return TypeGuardFunction(item, line=line, column=column)  # type: ignore[arg-type]
+
+    def serialize(self) -> JsonDict:
+        return {'.class': 'TypeGuardFunction', 'item': self.item.serialize()}
+
+    @classmethod
+    def deserialize(cls, data: JsonDict) -> 'TypeGuardFunction':
+        assert data['.class'] == 'TypeGuardFunction'
+        return TypeGuardFunction.make_normalized(deserialize_type(data['item']))
+
+
 class PlaceholderType(ProperType):
     """Temporary, yet-unknown type during semantic analysis.
 

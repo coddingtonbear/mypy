@@ -12,7 +12,7 @@ from mypy_extensions import DefaultNamedArg
 from mypy.messages import MessageBuilder, quote_type_string, format_type_bare
 from mypy.options import Options
 from mypy.types import (
-    Type, UnboundType, TypeVarType, TupleType, TypedDictType, UnionType, Instance, AnyType,
+    Type, TypeGuardFunction, UnboundType, TypeVarType, TupleType, TypedDictType, UnionType, Instance, AnyType,
     CallableType, NoneType, ErasedType, DeletedType, TypeList, TypeVarDef, SyntheticTypeVisitor,
     StarType, PartialType, EllipsisType, UninhabitedType, TypeType,
     CallableArgument, TypeQuery, union_items, TypeOfAny, LiteralType, RawExpressionType,
@@ -338,8 +338,11 @@ class TypeAnalyser(SyntheticTypeVisitor[Type], TypeAnalyzerPluginInterface):
         elif fullname in ('mypy_extensions.NoReturn', 'typing.NoReturn'):
             return UninhabitedType(is_noreturn=True)
         elif fullname == 'mypy.isinstance.IsInstance':
-            # @TODO: restrict return types to boolean
-            return AnyType(TypeOfAny.from_error)
+            import pdb
+            pdb.set_trace()
+            if len(t.args) != 1:
+                self.fail('TypeGuardFunction must have one type argument')
+            return TypeGuardFunction(t.args[0])
         elif fullname in ('typing_extensions.Literal', 'typing.Literal'):
             return self.analyze_literal_type(t)
         elif fullname in ('typing_extensions.Annotated', 'typing.Annotated'):
